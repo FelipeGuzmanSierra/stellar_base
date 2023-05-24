@@ -1,8 +1,8 @@
-defmodule StellarBase.XDR.Operations.ClaimClaimableBalanceResultTest do
+defmodule StellarBase.XDR.ClaimClaimableBalanceResultTest do
   use ExUnit.Case
 
   alias StellarBase.XDR.Void
-  alias StellarBase.XDR.Operations.{ClaimClaimableBalanceResult, ClaimClaimableBalanceResultCode}
+  alias StellarBase.XDR.{ClaimClaimableBalanceResult, ClaimClaimableBalanceResultCode}
 
   describe "ClaimClaimableBalanceResult" do
     setup do
@@ -17,7 +17,7 @@ defmodule StellarBase.XDR.Operations.ClaimClaimableBalanceResultTest do
     end
 
     test "new/1", %{code: code, value: value} do
-      %ClaimClaimableBalanceResult{code: ^code, result: ^value} =
+      %ClaimClaimableBalanceResult{value: ^value, type: ^code} =
         ClaimClaimableBalanceResult.new(value, code)
     end
 
@@ -44,7 +44,10 @@ defmodule StellarBase.XDR.Operations.ClaimClaimableBalanceResultTest do
 
     test "decode_xdr!/2 an error code" do
       {%ClaimClaimableBalanceResult{
-         code: %ClaimClaimableBalanceResultCode{identifier: :CLAIM_CLAIMABLE_BALANCE_CANNOT_CLAIM}
+         value: %Void{value: nil},
+         type: %ClaimClaimableBalanceResultCode{
+           identifier: :CLAIM_CLAIMABLE_BALANCE_CANNOT_CLAIM
+         }
        }, ""} = ClaimClaimableBalanceResult.decode_xdr!(<<255, 255, 255, 254>>)
     end
 

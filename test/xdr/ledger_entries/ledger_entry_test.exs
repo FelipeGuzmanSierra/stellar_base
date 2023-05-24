@@ -5,10 +5,9 @@ defmodule StellarBase.XDR.LedgerEntryTest do
 
   alias StellarBase.XDR.{
     LedgerEntry,
-    OptionalAccountID,
     SponsorshipDescriptor,
     LedgerEntryExtensionV1,
-    UInt32,
+    Uint32,
     Int64,
     SCVal,
     SCValType,
@@ -17,7 +16,7 @@ defmodule StellarBase.XDR.LedgerEntryTest do
     LedgerEntryExt,
     LedgerEntryData,
     Hash,
-    Ext,
+    LedgerEntryExtensionV1Ext,
     Void
   }
 
@@ -26,11 +25,10 @@ defmodule StellarBase.XDR.LedgerEntryTest do
       account_id =
         "GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY"
         |> create_account_id()
-        |> OptionalAccountID.new()
 
-      ext = Ext.new()
+      ext = LedgerEntryExtensionV1Ext.new(Void.new(), 0)
       sponsoring_id = SponsorshipDescriptor.new(account_id)
-      last_modified_ledger_seq = UInt32.new(5)
+      last_modified_ledger_seq = Uint32.new(5)
 
       contract_id = Hash.new("GCIZ3GSM5XL7OUS4UP64THMDZ7CZ3ZWN")
       key = SCVal.new(Int64.new(1), SCValType.new(:SCV_I64))
@@ -90,7 +88,7 @@ defmodule StellarBase.XDR.LedgerEntryTest do
             %LedgerEntry{
               last_modified_ledger_seq: ^last_modified_ledger_seq,
               data: ^data,
-              ledger_entry_ext: ^ledger_entry_ext
+              ext: ^ledger_entry_ext
             } =
               LedgerEntry.new(
                 last_modified_ledger_seq,

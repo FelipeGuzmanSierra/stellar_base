@@ -4,18 +4,25 @@ defmodule StellarBase.XDR.TrustLineEntryExtTest do
   alias StellarBase.XDR.{
     TrustLineEntryExt,
     Void,
-    TrustLineEntryExtV1,
     Liabilities,
-    TrustLineEntryExtV1Ext,
-    TrustLineEntryExtV2,
     Int32,
     Int64,
-    Ext
+    TrustLineEntryV1,
+    TrustLineEntryV1Ext,
+    TrustLineEntryExtensionV2,
+    TrustLineEntryExtensionV2Ext
   }
 
-  @trust_line_entry_ext_v1_ext_types [
+  @trust_line_entry_v1_ext_types [
     %{type: 0, value: Void.new()},
-    %{type: 2, value: TrustLineEntryExtV2.new(Int32.new(10), Ext.new())}
+    %{
+      type: 2,
+      value:
+        TrustLineEntryExtensionV2.new(
+          Int32.new(10),
+          TrustLineEntryExtensionV2Ext.new(Void.new(), 0)
+        )
+    }
   ]
 
   @types [0, 1, 1]
@@ -26,17 +33,17 @@ defmodule StellarBase.XDR.TrustLineEntryExtTest do
       selling = Int64.new(10)
       liabilities = Liabilities.new(buying, selling)
 
-      trust_line_entry_ext_v1_ext_list =
-        @trust_line_entry_ext_v1_ext_types
-        |> Enum.map(fn %{type: type, value: value} -> TrustLineEntryExtV1Ext.new(value, type) end)
+      trust_line_entry_v1_ext_list =
+        @trust_line_entry_v1_ext_types
+        |> Enum.map(fn %{type: type, value: value} -> TrustLineEntryV1Ext.new(value, type) end)
 
-      trust_line_entry_ext_v1_list =
-        trust_line_entry_ext_v1_ext_list
-        |> Enum.map(fn trust_line_entry_ext_v1_ext ->
-          TrustLineEntryExtV1.new(liabilities, trust_line_entry_ext_v1_ext)
+      trust_line_entry_v1_list =
+        trust_line_entry_v1_ext_list
+        |> Enum.map(fn trust_line_entry_v1 ->
+          TrustLineEntryV1.new(liabilities, trust_line_entry_v1)
         end)
 
-      values = [Void.new()] ++ trust_line_entry_ext_v1_list
+      values = [Void.new()] ++ trust_line_entry_v1_list
 
       trust_line_entry_ext_list =
         values

@@ -2,14 +2,14 @@ defmodule StellarBase.XDR.LedgerKeyListTest do
   use ExUnit.Case
 
   alias StellarBase.XDR.{
-    Account,
+    LedgerKeyAccount,
     AccountID,
     LedgerEntryType,
     LedgerKey,
     LedgerKeyList,
     PublicKey,
     PublicKeyType,
-    UInt256
+    Uint256
   }
 
   alias StellarBase.StrKey
@@ -21,12 +21,12 @@ defmodule StellarBase.XDR.LedgerKeyListTest do
       account_id =
         "GBZNLMUQMIN3VGUJISKZU7GNY3O3XLMYEHJCKCSMDHKLGSMKALRXOEZD"
         |> StrKey.decode!(:ed25519_public_key)
-        |> UInt256.new()
+        |> Uint256.new()
         |> PublicKey.new(pk_type)
         |> AccountID.new()
 
       type = LedgerEntryType.new(:ACCOUNT)
-      ledger_key_data = Account.new(account_id)
+      ledger_key_data = LedgerKeyAccount.new(account_id)
 
       ledger_keys = [LedgerKey.new(ledger_key_data, type)]
 
@@ -41,7 +41,7 @@ defmodule StellarBase.XDR.LedgerKeyListTest do
     end
 
     test "new/1", %{ledger_keys: ledger_keys} do
-      %LedgerKeyList{ledger_keys: ^ledger_keys} = LedgerKeyList.new(ledger_keys)
+      %LedgerKeyList{items: ^ledger_keys} = LedgerKeyList.new(ledger_keys)
     end
 
     test "encode_xdr/1", %{ledger_keys: ledger_keys, binary: binary} do

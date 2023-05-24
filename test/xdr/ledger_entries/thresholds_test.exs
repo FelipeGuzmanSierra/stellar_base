@@ -5,7 +5,8 @@ defmodule StellarBase.XDR.ThresholdsTest do
 
   describe "Thresholds" do
     setup do
-      thresholds = Thresholds.new(master_weight: 128, low: 16, med: 32, high: 64)
+      # master_weight: 128, low: 16, med: 32, high: 64
+      thresholds = Thresholds.new(<<128, 16, 32, 64>>)
 
       %{
         thresholds: thresholds,
@@ -13,9 +14,8 @@ defmodule StellarBase.XDR.ThresholdsTest do
       }
     end
 
-    test "new/1" do
-      %Thresholds{master_weight: 128, low: 16, med: 32, high: 64} =
-        Thresholds.new(master_weight: 128, low: 16, med: 32, high: 64)
+    test "new/1", %{binary: binary} do
+      %Thresholds{value: ^binary} = Thresholds.new(binary)
     end
 
     test "encode_xdr/1", %{thresholds: thresholds, binary: binary} do

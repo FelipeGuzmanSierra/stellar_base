@@ -2,36 +2,43 @@ defmodule StellarBase.XDR.InnerTransactionResultPairTest do
   use ExUnit.Case
 
   alias StellarBase.XDR.{
-    Ext,
+    InnerTransactionResultExt,
     Hash,
     InnerTransactionResult,
     InnerTransactionResultPair,
     Int64,
-    OperationInnerResult,
     OperationResult,
     OperationResultCode,
     OperationResultList,
+    OperationResultTr,
     OperationType,
-    TxResultV0,
+    InnerTransactionResultResult,
     TransactionResultCode,
     Void
   }
 
-  alias StellarBase.XDR.Operations.{CreateAccountResult, CreateAccountResultCode}
+  alias StellarBase.XDR.{CreateAccountResult, CreateAccountResultCode}
 
   describe "InnerTransactionResultPair" do
     setup do
+      transaction_result_code = TransactionResultCode.new(:txSUCCESS)
+
       result =
         Void.new()
         |> CreateAccountResult.new(CreateAccountResultCode.new(:CREATE_ACCOUNT_SUCCESS))
-        |> OperationInnerResult.new(OperationType.new(:CREATE_ACCOUNT))
+        |> OperationResultTr.new(OperationType.new(:CREATE_ACCOUNT))
         |> OperationResult.new(OperationResultCode.new(:opINNER))
         |> (&OperationResultList.new([&1])).()
-        |> TxResultV0.new(TransactionResultCode.new(:txSUCCESS))
+        |> InnerTransactionResultResult.new(transaction_result_code)
 
       transaction_hash = Hash.new("c61305a67fff6a82dbc6eebf1eb56a42")
 
-      inner_tx_result = InnerTransactionResult.new(Int64.new(100), result, Ext.new())
+      inner_tx_result =
+        InnerTransactionResult.new(
+          Int64.new(100),
+          result,
+          InnerTransactionResultExt.new(Void.new(), 0)
+        )
 
       %{
         transaction_hash: transaction_hash,

@@ -7,7 +7,7 @@ defmodule StellarBase.XDR.LiquidityPoolEntryBodyTest do
     Asset,
     AssetCode4,
     AssetType,
-    ConstantProduct,
+    LiquidityPoolEntryConstantProduct,
     Int32,
     Int64,
     LiquidityPoolConstantProductParameters,
@@ -15,7 +15,7 @@ defmodule StellarBase.XDR.LiquidityPoolEntryBodyTest do
     LiquidityPoolType,
     PublicKeyType,
     PublicKey,
-    UInt256,
+    Uint256,
     Void
   }
 
@@ -27,7 +27,7 @@ defmodule StellarBase.XDR.LiquidityPoolEntryBodyTest do
     issuer =
       "GBZNLMUQMIN3VGUJISKZU7GNY3O3XLMYEHJCKCSMDHKLGSMKALRXOEZD"
       |> StrKey.decode!(:ed25519_public_key)
-      |> UInt256.new()
+      |> Uint256.new()
       |> PublicKey.new(key_type)
       |> AccountID.new()
 
@@ -47,7 +47,7 @@ defmodule StellarBase.XDR.LiquidityPoolEntryBodyTest do
     params = LiquidityPoolConstantProductParameters.new(asset_a, asset_b, fee)
 
     entry =
-      ConstantProduct.new(
+      LiquidityPoolEntryConstantProduct.new(
         params,
         reserve_a,
         reserve_b,
@@ -70,7 +70,7 @@ defmodule StellarBase.XDR.LiquidityPoolEntryBodyTest do
   end
 
   test "new/1", %{type: type, entry: entry} do
-    %LiquidityPoolEntryBody{entry: ^entry, type: ^type} = LiquidityPoolEntryBody.new(entry, type)
+    %LiquidityPoolEntryBody{value: ^entry, type: ^type} = LiquidityPoolEntryBody.new(entry, type)
   end
 
   test "encode_xdr/1", %{xdr: xdr, binary: binary} do

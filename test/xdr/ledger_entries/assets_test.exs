@@ -1,4 +1,4 @@
-defmodule StellarBase.XDR.AssetsTest do
+defmodule StellarBase.XDR.AssetList5Test do
   use ExUnit.Case
 
   alias StellarBase.XDR.{
@@ -8,17 +8,17 @@ defmodule StellarBase.XDR.AssetsTest do
     Asset,
     AssetCode4,
     AssetCode12,
-    Assets,
+    AssetList5,
     AssetType,
     AccountID,
     PublicKey,
     PublicKeyType,
-    UInt256
+    Uint256
   }
 
   alias StellarBase.StrKey
 
-  describe "Assets" do
+  describe "AssetList5" do
     setup do
       issuer = create_issuer("GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY")
       asset1 = create_asset(:alpha_num4, code: "BTCN", issuer: issuer)
@@ -28,7 +28,7 @@ defmodule StellarBase.XDR.AssetsTest do
       %{
         issuer: issuer,
         assets_list: assets_list,
-        assets: Assets.new(assets_list),
+        assets: AssetList5.new(assets_list),
         binary:
           <<0, 0, 0, 2, 0, 0, 0, 1, 66, 84, 67, 78, 0, 0, 0, 0, 155, 142, 186, 248, 150, 56, 85,
             29, 207, 158, 164, 247, 67, 32, 113, 16, 107, 135, 171, 14, 45, 179, 214, 155, 117,
@@ -39,18 +39,18 @@ defmodule StellarBase.XDR.AssetsTest do
     end
 
     test "new/1", %{assets_list: assets} do
-      %Assets{assets: ^assets} = Assets.new(assets)
+      %AssetList5{items: ^assets} = AssetList5.new(assets)
     end
 
     test "encode_xdr/1", %{assets: assets, binary: binary} do
-      {:ok, ^binary} = Assets.encode_xdr(assets)
+      {:ok, ^binary} = AssetList5.encode_xdr(assets)
     end
 
     test "encode_xdr/1 with invalid elements" do
       {:error, :not_list} =
         %{elements: nil}
-        |> Assets.new()
-        |> Assets.encode_xdr()
+        |> AssetList5.new()
+        |> AssetList5.encode_xdr()
     end
 
     test "encode_xdr/1 with more than 5 elements", %{issuer: issuer} do
@@ -58,24 +58,24 @@ defmodule StellarBase.XDR.AssetsTest do
 
       {:error, :length_over_max} =
         assets
-        |> Assets.new()
-        |> Assets.encode_xdr()
+        |> AssetList5.new()
+        |> AssetList5.encode_xdr()
     end
 
     test "encode_xdr!/1", %{assets: assets, binary: binary} do
-      ^binary = Assets.encode_xdr!(assets)
+      ^binary = AssetList5.encode_xdr!(assets)
     end
 
     test "decode_xdr/2", %{assets: assets, binary: binary} do
-      {:ok, {^assets, ""}} = Assets.decode_xdr(binary)
+      {:ok, {^assets, ""}} = AssetList5.decode_xdr(binary)
     end
 
     test "decode_xdr/2 with an invalid binary" do
-      {:error, :not_binary} = Assets.decode_xdr(123)
+      {:error, :not_binary} = AssetList5.decode_xdr(123)
     end
 
     test "decode_xdr!/2", %{assets: assets, binary: binary} do
-      {^assets, ^binary} = Assets.decode_xdr!(binary <> binary)
+      {^assets, ^binary} = AssetList5.decode_xdr!(binary <> binary)
     end
   end
 
@@ -103,7 +103,7 @@ defmodule StellarBase.XDR.AssetsTest do
     pk_key =
       public_key
       |> StrKey.decode!(:ed25519_public_key)
-      |> UInt256.new()
+      |> Uint256.new()
 
     PublicKeyType.new(:PUBLIC_KEY_TYPE_ED25519)
     |> (&PublicKey.new(pk_key, &1)).()

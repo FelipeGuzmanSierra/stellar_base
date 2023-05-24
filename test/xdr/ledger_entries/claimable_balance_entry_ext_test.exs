@@ -1,11 +1,24 @@
 defmodule StellarBase.XDR.ClaimableBalanceEntryExtTest do
   use ExUnit.Case
 
-  alias StellarBase.XDR.{Void, ClaimableBalanceEntryExtV1, ClaimableBalanceEntryExt, Ext, UInt32}
+  alias StellarBase.XDR.{
+    Void,
+    ClaimableBalanceEntryExtensionV1,
+    ClaimableBalanceEntryExt,
+    ClaimableBalanceEntryExtensionV1Ext,
+    Uint32
+  }
 
   @arms [
     %{type: 0, value: Void.new()},
-    %{type: 1, value: ClaimableBalanceEntryExtV1.new(Ext.new(), UInt32.new(1))}
+    %{
+      type: 1,
+      value:
+        ClaimableBalanceEntryExtensionV1.new(
+          ClaimableBalanceEntryExtensionV1Ext.new(Void.new(), 0),
+          Uint32.new(1)
+        )
+    }
   ]
 
   @types [0, 1]

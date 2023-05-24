@@ -11,7 +11,7 @@ defmodule StellarBase.XDR.AssetTest do
     AssetType,
     PublicKey,
     PublicKeyType,
-    UInt256
+    Uint256
   }
 
   alias StellarBase.StrKey
@@ -22,7 +22,7 @@ defmodule StellarBase.XDR.AssetTest do
     issuer =
       "GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY"
       |> StrKey.decode!(:ed25519_public_key)
-      |> UInt256.new()
+      |> Uint256.new()
       |> PublicKey.new(key_type)
       |> AccountID.new()
 
@@ -47,7 +47,7 @@ defmodule StellarBase.XDR.AssetTest do
     end
 
     test "new/1", %{alpha_num4: alpha_num4, asset_type: asset_type} do
-      %Asset{asset: ^alpha_num4, type: ^asset_type} = Asset.new(alpha_num4, asset_type)
+      %Asset{value: ^alpha_num4, type: ^asset_type} = Asset.new(alpha_num4, asset_type)
     end
 
     test "encode_xdr/1", %{asset: asset, binary: binary} do
@@ -87,10 +87,7 @@ defmodule StellarBase.XDR.AssetTest do
     setup %{issuer: issuer} do
       asset_type = AssetType.new(:ASSET_TYPE_CREDIT_ALPHANUM12)
 
-      alpha_num12 =
-        "BTCN2021"
-        |> AssetCode12.new()
-        |> AlphaNum12.new(issuer)
+      alpha_num12 = "BTCN2021" |> AssetCode12.new() |> AlphaNum12.new(issuer)
 
       %{
         alpha_num12: alpha_num12,
@@ -104,7 +101,7 @@ defmodule StellarBase.XDR.AssetTest do
     end
 
     test "new/1", %{alpha_num12: alpha_num12, asset_type: asset_type} do
-      %Asset{asset: ^alpha_num12, type: ^asset_type} = Asset.new(alpha_num12, asset_type)
+      %Asset{value: ^alpha_num12, type: ^asset_type} = Asset.new(alpha_num12, asset_type)
     end
 
     test "encode_xdr/1", %{asset: asset, binary: binary} do

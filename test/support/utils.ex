@@ -12,7 +12,7 @@ defmodule StellarBase.Test.Utils do
     AssetType,
     CryptoKeyType,
     DecoratedSignature,
-    DecoratedSignatures,
+    DecoratedSignatureList20,
     MuxedAccount,
     OperationBody,
     OperationType,
@@ -20,18 +20,18 @@ defmodule StellarBase.Test.Utils do
     PublicKeyType,
     Signature,
     SignatureHint,
-    UInt256
+    Uint256
   }
 
   alias StellarBase.StrKey
 
-  alias StellarBase.XDR.Operations.{Payment, Clawback}
+  alias StellarBase.XDR.{PaymentOp, ClawbackOp}
 
-  @spec ed25519_public_key(pk_key :: binary()) :: UInt256.t()
+  @spec ed25519_public_key(pk_key :: binary()) :: Uint256.t()
   def ed25519_public_key(pk_key) do
     pk_key
     |> StrKey.decode!(:ed25519_public_key)
-    |> UInt256.new()
+    |> Uint256.new()
   end
 
   @spec create_account_id(pk_key :: binary()) :: AccountID.t()
@@ -40,7 +40,7 @@ defmodule StellarBase.Test.Utils do
 
     pk_key
     |> StrKey.decode!(:ed25519_public_key)
-    |> UInt256.new()
+    |> Uint256.new()
     |> PublicKey.new(key_type)
     |> AccountID.new()
   end
@@ -51,7 +51,7 @@ defmodule StellarBase.Test.Utils do
 
     pk_key
     |> StrKey.decode!(:ed25519_public_key)
-    |> UInt256.new()
+    |> Uint256.new()
     |> MuxedAccount.new(key_type)
   end
 
@@ -80,7 +80,7 @@ defmodule StellarBase.Test.Utils do
           OperationBody.t()
   def payment_op_body(destination, asset, amount) do
     destination
-    |> Payment.new(asset, amount)
+    |> PaymentOp.new(asset, amount)
     |> OperationBody.new(OperationType.new(:PAYMENT))
   end
 
@@ -88,18 +88,18 @@ defmodule StellarBase.Test.Utils do
           OperationBody.t()
   def clawback_op_body(asset, from, amount) do
     asset
-    |> Clawback.new(from, amount)
+    |> ClawbackOp.new(from, amount)
     |> OperationBody.new(OperationType.new(:CLAWBACK))
   end
 
-  @spec build_decorated_signatures(signatures :: list(binary())) :: DecoratedSignatures.t()
+  @spec build_decorated_signatures(signatures :: list(binary())) :: DecoratedSignatureList20.t()
   def build_decorated_signatures(signatures) do
     signatures
     |> Enum.map(&build_signature/1)
-    |> DecoratedSignatures.new()
+    |> DecoratedSignatureList20.new()
   end
 
-  @spec build_signature(secret_seed :: binary()) :: DecoratedSignatures.t()
+  @spec build_signature(secret_seed :: binary()) :: DecoratedSignatureList20.t()
   def build_signature(<<_hint::binary-size(52), hint::binary-size(4)>> = secret_seed) do
     signature = Signature.new(secret_seed)
 

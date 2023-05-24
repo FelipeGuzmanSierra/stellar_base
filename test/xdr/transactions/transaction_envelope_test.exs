@@ -5,8 +5,9 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
 
   alias StellarBase.XDR.{
     EnvelopeType,
-    Ext,
-    FeeBumpInnerTx,
+    TransactionV0Ext,
+    FeeBumpTransactionExt,
+    FeeBumpTransactionInnerTx,
     FeeBumpTransaction,
     FeeBumpTransactionEnvelope,
     Int64,
@@ -15,7 +16,7 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
     OptionalTimeBounds,
     OptionalMuxedAccount,
     Operation,
-    Operations,
+    OperationList100,
     Preconditions,
     PreconditionType,
     SequenceNumber,
@@ -23,24 +24,26 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
     TimePoint,
     Transaction,
     TransactionV0,
+    TransactionExt,
     TransactionEnvelope,
     TransactionV0Envelope,
     TransactionV1Envelope,
-    UInt32,
-    UInt64,
-    UInt256
+    Uint32,
+    Uint64,
+    Uint256,
+    Void
   }
 
   alias StellarBase.StrKey
 
   setup do
     # Seq number
-    fee = UInt32.new(100)
-    seq_num = SequenceNumber.new(12_345_678)
+    fee = Uint32.new(100)
+    seq_num = SequenceNumber.new(Int64.new(12_345_678))
 
     # time bounds
-    min_time = TimePoint.new(123)
-    max_time = TimePoint.new(321)
+    min_time = TimePoint.new(Uint64.new(123))
+    max_time = TimePoint.new(Uint64.new(321))
     time_bounds = TimeBounds.new(min_time, max_time)
     op_time_bounds = OptionalTimeBounds.new(time_bounds)
 
@@ -50,14 +53,14 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
 
     # memo
     memo_type = MemoType.new(:MEMO_ID)
-    memo_id = UInt64.new(12_345)
+    memo_id = Uint64.new(12_345)
     memo = Memo.new(memo_id, memo_type)
 
     # operations
     operations = build_operations()
 
     # ext
-    ext = Ext.new()
+    ext = TransactionExt.new(Void.new(), 0)
 
     {:ok,
      %{
@@ -77,13 +80,14 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
       seq_num: seq_num,
       time_bounds: time_bounds,
       memo: memo,
-      operations: operations,
-      ext: ext
+      operations: operations
     } do
       source_account_ed25519 =
         "GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY"
         |> StrKey.decode!(:ed25519_public_key)
-        |> UInt256.new()
+        |> Uint256.new()
+
+      transaction_v0_ext = TransactionV0Ext.new(Void.new(), 0)
 
       tx =
         TransactionV0.new(
@@ -93,7 +97,7 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
           time_bounds,
           memo,
           operations,
-          ext
+          transaction_v0_ext
         )
 
       envelope_type = EnvelopeType.new(:ENVELOPE_TYPE_TX_V0)
@@ -139,7 +143,7 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
     end
 
     test "new/1", %{tx_envelope: tx_envelope, envelope_type: envelope_type} do
-      %TransactionEnvelope{envelope: ^tx_envelope, type: ^envelope_type} =
+      %TransactionEnvelope{value: ^tx_envelope, type: ^envelope_type} =
         TransactionEnvelope.new(tx_envelope, envelope_type)
     end
 
@@ -230,7 +234,7 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
     end
 
     test "new/1", %{tx_envelope: tx_envelope, envelope_type: envelope_type} do
-      %TransactionEnvelope{envelope: ^tx_envelope, type: ^envelope_type} =
+      %TransactionEnvelope{value: ^tx_envelope, type: ^envelope_type} =
         TransactionEnvelope.new(tx_envelope, envelope_type)
     end
 
@@ -282,11 +286,18 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
           "SBVNQLIDS7V3NAOYTATT26QL7Y4S6C2X4YN7PN5FIJ6JUAN4UV4YPLUY"
         ])
 
+      fee_bump_transaction_ext = FeeBumpTransactionExt.new(Void.new(), 0)
+
       tx_envelope =
         tx
         |> TransactionV1Envelope.new(signatures)
-        |> FeeBumpInnerTx.new(EnvelopeType.new(:ENVELOPE_TYPE_TX))
-        |> (&FeeBumpTransaction.new(source_account, Int64.new(100_000), &1, ext)).()
+        |> FeeBumpTransactionInnerTx.new(EnvelopeType.new(:ENVELOPE_TYPE_TX))
+        |> (&FeeBumpTransaction.new(
+              source_account,
+              Int64.new(100_000),
+              &1,
+              fee_bump_transaction_ext
+            )).()
         |> FeeBumpTransactionEnvelope.new(signatures)
 
       %{
@@ -330,7 +341,7 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
     end
 
     test "new/1", %{tx_envelope: tx_envelope, envelope_type: envelope_type} do
-      %TransactionEnvelope{envelope: ^tx_envelope, type: ^envelope_type} =
+      %TransactionEnvelope{value: ^tx_envelope, type: ^envelope_type} =
         TransactionEnvelope.new(tx_envelope, envelope_type)
     end
 
@@ -351,7 +362,7 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
     end
   end
 
-  @spec build_operations() :: Operations.t()
+  @spec build_operations() :: OperationList100.t()
   defp build_operations do
     source_account =
       "GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY"
@@ -370,7 +381,7 @@ defmodule StellarBase.XDR.TransactionEnvelopeTest do
     clawback_operation = clawback_op_body(asset, destination, Int64.new(1_000_000_000))
 
     [payment_operation, clawback_operation]
-    |> Enum.map(fn op -> Operation.new(op, source_account) end)
-    |> Operations.new()
+    |> Enum.map(fn op -> Operation.new(source_account, op) end)
+    |> OperationList100.new()
   end
 end

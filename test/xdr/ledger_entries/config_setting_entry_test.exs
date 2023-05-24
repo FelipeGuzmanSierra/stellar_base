@@ -6,14 +6,15 @@ defmodule StellarBase.XDR.ConfigSettingEntryTest do
     ConfigSettingType,
     ConfigSettingID,
     ConfigSetting,
-    Ext,
-    UInt32
+    ConfigSettingEntryExt,
+    Uint32,
+    Void
   }
 
   describe "ConfigSettingEntry" do
     setup do
-      extension_point = Ext.new()
-      value = UInt32.new(4_545_234)
+      extension_point = ConfigSettingEntryExt.new(Void.new(), 0)
+      value = Uint32.new(4_545_234)
       type = ConfigSettingType.new(:CONFIG_SETTING_TYPE_UINT32)
 
       config_setting_id = ConfigSettingID.new(:CONFIG_SETTING_CONTRACT_MAX_SIZE)
@@ -24,8 +25,8 @@ defmodule StellarBase.XDR.ConfigSettingEntryTest do
         config_setting_id: config_setting_id,
         config_setting: config_setting,
         config_setting_entry:
-          ConfigSettingEntry.new(config_setting_id, config_setting, extension_point),
-        binary: <<0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 90, 210, 0, 0, 0, 0>>
+          ConfigSettingEntry.new(extension_point, config_setting_id, config_setting),
+        binary: <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 90, 210>>
       }
     end
 
@@ -36,9 +37,9 @@ defmodule StellarBase.XDR.ConfigSettingEntryTest do
     } do
       %ConfigSettingEntry{
         config_setting_id: ^config_setting_id,
-        config_setting: ^config_setting,
+        setting: ^config_setting,
         ext: ^extension_point
-      } = ConfigSettingEntry.new(config_setting_id, config_setting, extension_point)
+      } = ConfigSettingEntry.new(extension_point, config_setting_id, config_setting)
     end
 
     test "encode_xdr/1", %{config_setting_entry: config_setting_entry, binary: binary} do

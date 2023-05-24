@@ -9,21 +9,28 @@ defmodule StellarBase.XDR.TrustLineEntryTest do
     AlphaNum4,
     AssetCode4,
     TrustLineEntryExt,
-    UInt32,
+    Uint32,
     Int64,
     TrustLineAsset,
     Void,
     Liabilities,
-    TrustLineEntryExtV1,
-    TrustLineEntryExtV2,
     Int32,
-    Ext,
-    TrustLineEntryExtV1Ext
+    TrustLineEntryV1,
+    TrustLineEntryV1Ext,
+    TrustLineEntryExtensionV2,
+    TrustLineEntryExtensionV2Ext
   }
 
   @trust_line_entry_ext_v1_ext_types [
     %{type: 0, value: Void.new()},
-    %{type: 2, value: TrustLineEntryExtV2.new(Int32.new(10), Ext.new())}
+    %{
+      type: 2,
+      value:
+        TrustLineEntryExtensionV2.new(
+          Int32.new(10),
+          TrustLineEntryExtensionV2Ext.new(Void.new(), 0)
+        )
+    }
   ]
 
   @types [0, 1, 1]
@@ -46,23 +53,23 @@ defmodule StellarBase.XDR.TrustLineEntryTest do
 
       limit = Int64.new(6_000_000)
 
-      flags = UInt32.new(1)
+      flags = Uint32.new(1)
 
       buying = Int64.new(20)
       selling = Int64.new(10)
       liabilities = Liabilities.new(buying, selling)
 
-      trust_line_entry_ext_v1_ext_list =
+      trust_line_entry_v1_ext_list =
         @trust_line_entry_ext_v1_ext_types
-        |> Enum.map(fn %{type: type, value: value} -> TrustLineEntryExtV1Ext.new(value, type) end)
+        |> Enum.map(fn %{type: type, value: value} -> TrustLineEntryV1Ext.new(value, type) end)
 
-      trust_line_entry_ext_v1_list =
-        trust_line_entry_ext_v1_ext_list
-        |> Enum.map(fn trust_line_entry_ext_v1_ext ->
-          TrustLineEntryExtV1.new(liabilities, trust_line_entry_ext_v1_ext)
+      trust_line_entry_v1_list =
+        trust_line_entry_v1_ext_list
+        |> Enum.map(fn trust_line_entry_v1_ext ->
+          TrustLineEntryV1.new(liabilities, trust_line_entry_v1_ext)
         end)
 
-      values = [Void.new()] ++ trust_line_entry_ext_v1_list
+      values = [Void.new()] ++ trust_line_entry_v1_list
 
       trust_line_entry_ext_list =
         values
@@ -115,7 +122,7 @@ defmodule StellarBase.XDR.TrustLineEntryTest do
               balance: ^balance,
               limit: ^limit,
               flags: ^flags,
-              trust_line_entry_ext: ^trust_line_entry_ext
+              ext: ^trust_line_entry_ext
             } = TrustLineEntry.new(account_id, asset, balance, limit, flags, trust_line_entry_ext)
     end
 

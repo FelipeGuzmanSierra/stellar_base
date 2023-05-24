@@ -15,15 +15,16 @@ defmodule StellarBase.XDR.AccountEntryTest do
     AccountEntry,
     ExtensionPoint,
     OptionalAccountID,
-    SponsorshipDescriptorList,
+    SponsorshipDescriptorList20,
     SponsorshipDescriptor,
     Int64,
     SequenceNumber,
-    UInt32,
+    Uint32,
     String32,
     Thresholds,
-    Signers,
-    UInt256,
+    SignerList20,
+    Uint256,
+    Uint64,
     SignerKey,
     Signer,
     SignerKeyType,
@@ -45,30 +46,30 @@ defmodule StellarBase.XDR.AccountEntryTest do
         |> OptionalAccountID.new()
 
       signer_type = SignerKeyType.new(:SIGNER_KEY_TYPE_ED25519)
-      signer_weight = UInt32.new(2)
+      signer_weight = Uint32.new(2)
 
       signer =
         "GBQVLZE4XCNDFW2N3SPUG4SI6D6YCDJPI45M5JHWUGHQSAT7REKIGCNQ"
         |> StrKey.decode!(:ed25519_public_key)
-        |> UInt256.new()
+        |> Uint256.new()
         |> SignerKey.new(signer_type)
         |> Signer.new(signer_weight)
 
       balance = Int64.new(5)
-      seq_num = SequenceNumber.new(12_345_678)
-      num_sub_entries = UInt32.new(5)
-      flags = UInt32.new(5)
+      seq_num = SequenceNumber.new(Int64.new(12_345_678))
+      num_sub_entries = Uint32.new(5)
+      flags = Uint32.new(5)
       home_domain = String32.new("kommit.co")
-      thresholds = Thresholds.new(master_weight: 128, low: 16, med: 32, high: 64)
-      signers = Signers.new([signer])
+      thresholds = Thresholds.new(<<128, 16, 32, 64>>)
+      signers = SignerList20.new([signer])
 
       buying = Int64.new(20)
       selling = Int64.new(10)
       liabilities = Liabilities.new(buying, selling)
 
       extension_point = ExtensionPoint.new(Void.new(), 0)
-      seq_ledger = UInt32.new(10)
-      seq_time = TimePoint.new(12_345)
+      seq_ledger = Uint32.new(10)
+      seq_time = TimePoint.new(Uint64.new(12_345))
 
       account_entry_extension_v2_ext_list =
         [
@@ -86,8 +87,8 @@ defmodule StellarBase.XDR.AccountEntryTest do
         account_entry_extension_v2_ext_list
         |> Enum.map(fn account_entry_extension_v2_ext ->
           AccountEntryExtensionV2.new(
-            UInt32.new(10),
-            UInt32.new(10),
+            Uint32.new(10),
+            Uint32.new(10),
             create_sponsorship_descriptor_list(),
             account_entry_extension_v2_ext
           )
@@ -220,7 +221,7 @@ defmodule StellarBase.XDR.AccountEntryTest do
               home_domain: ^home_domain,
               thresholds: ^thresholds,
               signers: ^signers,
-              account_entry_ext: ^account_entry_ext
+              ext: ^account_entry_ext
             } =
               AccountEntry.new(
                 account_id,
@@ -261,20 +262,18 @@ defmodule StellarBase.XDR.AccountEntryTest do
     end
   end
 
-  @spec create_sponsorship_descriptor_list() :: SponsorshipDescriptorList.t()
+  @spec create_sponsorship_descriptor_list() :: SponsorshipDescriptorList20.t()
   defp create_sponsorship_descriptor_list do
     sponsorship_descriptor_1 =
       "GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY"
       |> create_account_id()
-      |> OptionalAccountID.new()
       |> SponsorshipDescriptor.new()
 
     sponsorship_descriptor_2 =
       "GBZNLMUQMIN3VGUJISKZU7GNY3O3XLMYEHJCKCSMDHKLGSMKALRXOEZD"
       |> create_account_id()
-      |> OptionalAccountID.new()
       |> SponsorshipDescriptor.new()
 
-    SponsorshipDescriptorList.new([sponsorship_descriptor_1, sponsorship_descriptor_2])
+    SponsorshipDescriptorList20.new([sponsorship_descriptor_1, sponsorship_descriptor_2])
   end
 end

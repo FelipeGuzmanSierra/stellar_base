@@ -2,7 +2,7 @@ defmodule StellarBase.XDR.LedgerFootprintTest do
   use ExUnit.Case
 
   alias StellarBase.XDR.{
-    Account,
+    LedgerKeyAccount,
     AccountID,
     LedgerEntryType,
     LedgerFootprint,
@@ -10,7 +10,7 @@ defmodule StellarBase.XDR.LedgerFootprintTest do
     LedgerKeyList,
     PublicKey,
     PublicKeyType,
-    UInt256
+    Uint256
   }
 
   alias StellarBase.StrKey
@@ -22,12 +22,12 @@ defmodule StellarBase.XDR.LedgerFootprintTest do
       account_id =
         "GBZNLMUQMIN3VGUJISKZU7GNY3O3XLMYEHJCKCSMDHKLGSMKALRXOEZD"
         |> StrKey.decode!(:ed25519_public_key)
-        |> UInt256.new()
+        |> Uint256.new()
         |> PublicKey.new(pk_type)
         |> AccountID.new()
 
       type = LedgerEntryType.new(:ACCOUNT)
-      ledger_key_data = Account.new(account_id)
+      ledger_key_data = LedgerKeyAccount.new(account_id)
 
       ledger_keys = [LedgerKey.new(ledger_key_data, type)]
 

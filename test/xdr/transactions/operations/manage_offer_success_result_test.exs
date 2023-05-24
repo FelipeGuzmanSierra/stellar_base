@@ -1,4 +1,4 @@
-defmodule StellarBase.XDR.Operations.ManageOfferSuccessResultTest do
+defmodule StellarBase.XDR.ManageOfferSuccessResultTest do
   use ExUnit.Case
 
   import StellarBase.Test.Utils
@@ -8,15 +8,20 @@ defmodule StellarBase.XDR.Operations.ManageOfferSuccessResultTest do
     ClaimAtomType,
     ClaimOfferAtom,
     ClaimAtomList,
-    Ext,
+    OfferEntryExt,
     Int32,
     Int64,
     OfferEntry,
     Price,
-    UInt32
+    Uint32,
+    Void
   }
 
-  alias StellarBase.XDR.Operations.{ManageOffer, ManageOfferEffect, ManageOfferSuccessResult}
+  alias StellarBase.XDR.{
+    ManageOfferSuccessResultOffer,
+    ManageOfferEffect,
+    ManageOfferSuccessResult
+  }
 
   describe "ManageOfferSuccessResult" do
     setup do
@@ -113,8 +118,8 @@ defmodule StellarBase.XDR.Operations.ManageOfferSuccessResultTest do
     offer_id = Int64.new(123_456)
     amount = Int64.new(5_000_000)
     price = Price.new(Int32.new(1), Int32.new(10))
-    flags = UInt32.new(1)
-    ext = Ext.new()
+    flags = Uint32.new(1)
+    ext = OfferEntryExt.new(Void.new(), 0)
 
     selling =
       create_asset(:alpha_num4,
@@ -130,6 +135,6 @@ defmodule StellarBase.XDR.Operations.ManageOfferSuccessResultTest do
 
     seller_id
     |> OfferEntry.new(offer_id, selling, buying, amount, price, flags, ext)
-    |> ManageOffer.new(ManageOfferEffect.new(:MANAGE_OFFER_CREATED))
+    |> ManageOfferSuccessResultOffer.new(ManageOfferEffect.new(:MANAGE_OFFER_CREATED))
   end
 end

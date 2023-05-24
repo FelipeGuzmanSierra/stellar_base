@@ -1,9 +1,6 @@
 defmodule StellarBase.XDR.SCStatusTest do
   use ExUnit.Case
 
-  alias StellarBase.XDR.SCStatus
-  alias StellarBase.XDR.SCStatusType
-
   alias StellarBase.XDR.{
     SCUnknownErrorCode,
     SCHostValErrorCode,
@@ -13,8 +10,9 @@ defmodule StellarBase.XDR.SCStatusTest do
     SCHostContextErrorCode,
     SCVmErrorCode,
     SCHostAuthErrorCode,
+    SCStatus,
     SCStatusType,
-    UInt32,
+    Uint32,
     Void
   }
 
@@ -63,7 +61,7 @@ defmodule StellarBase.XDR.SCStatusTest do
         },
         %{
           status_type: SCStatusType.new(:SST_CONTRACT_ERROR),
-          sc_code: UInt32.new(3312),
+          sc_code: Uint32.new(3312),
           binary: <<0, 0, 0, 8, 0, 0, 12, 240>>
         },
         %{
@@ -78,7 +76,7 @@ defmodule StellarBase.XDR.SCStatusTest do
 
     test "new/1", %{discriminants: discriminants} do
       for %{status_type: status_type, sc_code: sc_code} <- discriminants do
-        %SCStatus{code: ^sc_code, type: ^status_type} = SCStatus.new(sc_code, status_type)
+        %SCStatus{value: ^sc_code, type: ^status_type} = SCStatus.new(sc_code, status_type)
       end
     end
 

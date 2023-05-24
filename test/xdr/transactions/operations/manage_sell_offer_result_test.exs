@@ -1,4 +1,4 @@
-defmodule StellarBase.XDR.Operations.ManageSellOfferResultTest do
+defmodule StellarBase.XDR.ManageSellOfferResultTest do
   use ExUnit.Case
 
   import StellarBase.Test.Utils
@@ -12,11 +12,11 @@ defmodule StellarBase.XDR.Operations.ManageSellOfferResultTest do
     Void
   }
 
-  alias StellarBase.XDR.Operations.{
+  alias StellarBase.XDR.{
     ManageSellOfferResult,
     ManageSellOfferResultCode,
     ManageOfferSuccessResult,
-    ManageOffer,
+    ManageOfferSuccessResultOffer,
     ManageOfferEffect
   }
 
@@ -43,7 +43,7 @@ defmodule StellarBase.XDR.Operations.ManageSellOfferResultTest do
     end
 
     test "new/1", %{code: code, value: value} do
-      %ManageSellOfferResult{code: ^code, result: ^value} = ManageSellOfferResult.new(value, code)
+      %ManageSellOfferResult{value: ^value, type: ^code} = ManageSellOfferResult.new(value, code)
     end
 
     test "encode_xdr/1", %{result: result, binary: binary} do
@@ -73,7 +73,8 @@ defmodule StellarBase.XDR.Operations.ManageSellOfferResultTest do
 
     test "decode_xdr!/2 an error code" do
       {%ManageSellOfferResult{
-         code: %ManageSellOfferResultCode{identifier: :MANAGE_SELL_OFFER_SELL_NO_TRUST}
+         value: %Void{value: nil},
+         type: %ManageSellOfferResultCode{identifier: :MANAGE_SELL_OFFER_SELL_NO_TRUST}
        }, ""} = ManageSellOfferResult.decode_xdr!(<<255, 255, 255, 254>>)
     end
 
@@ -119,7 +120,8 @@ defmodule StellarBase.XDR.Operations.ManageSellOfferResultTest do
         ClaimAtom.new(claim_offer_atom, ClaimAtomType.new(:CLAIM_ATOM_TYPE_ORDER_BOOK))
       ])
 
-    manage_offer = ManageOffer.new(Void.new(), ManageOfferEffect.new(:MANAGE_OFFER_DELETED))
+    manage_offer =
+      ManageOfferSuccessResultOffer.new(Void.new(), ManageOfferEffect.new(:MANAGE_OFFER_DELETED))
 
     ManageOfferSuccessResult.new(offers, manage_offer)
   end

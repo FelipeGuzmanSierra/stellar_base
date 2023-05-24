@@ -1,14 +1,13 @@
 defmodule StellarBase.XDR.SCAddressTest do
   use ExUnit.Case
 
-  alias StellarBase.XDR.SCAddress
-  alias StellarBase.XDR.SCAddressType
-
   alias StellarBase.XDR.{
     AccountID,
     PublicKey,
     PublicKeyType,
-    UInt256
+    Uint256,
+    SCAddress,
+    SCAddressType
   }
 
   alias StellarBase.StrKey
@@ -20,7 +19,7 @@ defmodule StellarBase.XDR.SCAddressTest do
       account_id =
         "GBZNLMUQMIN3VGUJISKZU7GNY3O3XLMYEHJCKCSMDHKLGSMKALRXOEZD"
         |> StrKey.decode!(:ed25519_public_key)
-        |> UInt256.new()
+        |> Uint256.new()
         |> PublicKey.new(pk_type)
         |> AccountID.new()
 
@@ -38,7 +37,7 @@ defmodule StellarBase.XDR.SCAddressTest do
     end
 
     test "new/1", %{account_id: account_id, sc_address_type: sc_address_type} do
-      %SCAddress{sc_address: ^account_id, type: ^sc_address_type} =
+      %SCAddress{value: ^account_id, type: ^sc_address_type} =
         SCAddress.new(account_id, sc_address_type)
     end
 

@@ -5,8 +5,8 @@ defmodule StellarBase.XDR.FeeBumpTransactionEnvelopeTest do
 
   alias StellarBase.XDR.{
     EnvelopeType,
-    Ext,
-    FeeBumpInnerTx,
+    FeeBumpTransactionExt,
+    FeeBumpTransactionInnerTx,
     FeeBumpTransaction,
     FeeBumpTransactionEnvelope,
     Int64,
@@ -14,7 +14,7 @@ defmodule StellarBase.XDR.FeeBumpTransactionEnvelopeTest do
     MemoType,
     OptionalMuxedAccount,
     Operation,
-    Operations,
+    OperationList100,
     Preconditions,
     PreconditionType,
     SequenceNumber,
@@ -22,8 +22,10 @@ defmodule StellarBase.XDR.FeeBumpTransactionEnvelopeTest do
     TimePoint,
     Transaction,
     TransactionV1Envelope,
-    UInt32,
-    UInt64
+    TransactionExt,
+    Uint32,
+    Uint64,
+    Void
   }
 
   describe "FeeBumpTransactionEnvelope" do
@@ -102,7 +104,7 @@ defmodule StellarBase.XDR.FeeBumpTransactionEnvelopeTest do
     end
   end
 
-  @spec build_fee_bump_tx() :: FeeBumpInnerTx.t()
+  @spec build_fee_bump_tx() :: FeeBumpTransactionInnerTx.t()
   defp build_fee_bump_tx do
     envelope_type = EnvelopeType.new(:ENVELOPE_TYPE_TX)
 
@@ -119,9 +121,9 @@ defmodule StellarBase.XDR.FeeBumpTransactionEnvelopeTest do
     inner_tx =
       build_transaction()
       |> TransactionV1Envelope.new(signatures)
-      |> FeeBumpInnerTx.new(envelope_type)
+      |> FeeBumpTransactionInnerTx.new(envelope_type)
 
-    ext = Ext.new()
+    ext = FeeBumpTransactionExt.new(Void.new(), 0)
 
     FeeBumpTransaction.new(fee_source, fee, inner_tx, ext)
   end
@@ -131,25 +133,37 @@ defmodule StellarBase.XDR.FeeBumpTransactionEnvelopeTest do
     source_account =
       create_muxed_account("GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY")
 
-    fee = UInt32.new(100)
-    seq_num = SequenceNumber.new(12_345_678)
+    fee = Uint32.new(100)
+
+    seq_num =
+      12_345_678
+      |> Int64.new()
+      |> SequenceNumber.new()
 
     # preconditions
-    min_time = TimePoint.new(123)
-    max_time = TimePoint.new(321)
+    min_time =
+      123
+      |> Uint64.new()
+      |> TimePoint.new()
+
+    max_time =
+      321
+      |> Uint64.new()
+      |> TimePoint.new()
+
     time_bounds = TimeBounds.new(min_time, max_time)
     precondition_type = PreconditionType.new(:PRECOND_TIME)
     preconditions = Preconditions.new(time_bounds, precondition_type)
 
     # memo
     memo_type = MemoType.new(:MEMO_ID)
-    memo_id = UInt64.new(12_345)
+    memo_id = Uint64.new(12_345)
     memo = Memo.new(memo_id, memo_type)
 
     # operations
     operations = build_operations()
 
-    ext = Ext.new()
+    ext = TransactionExt.new(Void.new(), 0)
 
     Transaction.new(
       source_account,
@@ -162,7 +176,7 @@ defmodule StellarBase.XDR.FeeBumpTransactionEnvelopeTest do
     )
   end
 
-  @spec build_operations() :: Operations.t()
+  @spec build_operations() :: OperationList100.t()
   defp build_operations do
     source_account =
       "GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY"
@@ -181,7 +195,7 @@ defmodule StellarBase.XDR.FeeBumpTransactionEnvelopeTest do
     clawback_operation = clawback_op_body(asset, destination, Int64.new(1_000_000_000))
 
     [payment_operation, clawback_operation]
-    |> Enum.map(fn op -> Operation.new(op, source_account) end)
-    |> Operations.new()
+    |> Enum.map(fn op -> Operation.new(source_account, op) end)
+    |> OperationList100.new()
   end
 end

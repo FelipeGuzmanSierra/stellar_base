@@ -1,4 +1,4 @@
-defmodule StellarBase.XDR.Operations.PathPaymentStrictSendResultTest do
+defmodule StellarBase.XDR.PathPaymentStrictSendResultTest do
   use ExUnit.Case
 
   import StellarBase.Test.Utils
@@ -8,13 +8,14 @@ defmodule StellarBase.XDR.Operations.PathPaymentStrictSendResultTest do
     ClaimAtomType,
     ClaimOfferAtom,
     ClaimAtomList,
-    Int64
+    Int64,
+    Void
   }
 
-  alias StellarBase.XDR.Operations.{
+  alias StellarBase.XDR.{
     PathPaymentStrictSendResult,
     PathPaymentStrictSendResultCode,
-    PathPaymentStrictResultSuccess,
+    PathPaymentStrictSendResultSuccess,
     SimplePaymentResult
   }
 
@@ -61,7 +62,7 @@ defmodule StellarBase.XDR.Operations.PathPaymentStrictSendResultTest do
 
       code = PathPaymentStrictSendResultCode.new(:PATH_PAYMENT_STRICT_SEND_SUCCESS)
 
-      path_payment_success = PathPaymentStrictResultSuccess.new(offers, last_payment)
+      path_payment_success = PathPaymentStrictSendResultSuccess.new(offers, last_payment)
 
       %{
         code: code,
@@ -85,7 +86,7 @@ defmodule StellarBase.XDR.Operations.PathPaymentStrictSendResultTest do
     end
 
     test "new/1", %{code: code, value: value} do
-      %PathPaymentStrictSendResult{code: ^code, result: ^value} =
+      %PathPaymentStrictSendResult{value: ^value, type: ^code} =
         PathPaymentStrictSendResult.new(value, code)
     end
 
@@ -114,7 +115,8 @@ defmodule StellarBase.XDR.Operations.PathPaymentStrictSendResultTest do
 
     test "decode_xdr!/2 an error code" do
       {%PathPaymentStrictSendResult{
-         code: %PathPaymentStrictSendResultCode{
+         value: %Void{value: nil},
+         type: %PathPaymentStrictSendResultCode{
            identifier: :PATH_PAYMENT_STRICT_SEND_SRC_NOT_AUTHORIZED
          }
        }, ""} = PathPaymentStrictSendResult.decode_xdr!(<<255, 255, 255, 252>>)

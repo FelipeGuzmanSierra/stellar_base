@@ -2,15 +2,15 @@ defmodule StellarBase.XDR.OperationResultListTest do
   use ExUnit.Case
 
   alias StellarBase.XDR.{
-    OperationInnerResult,
     OperationResult,
     OperationResultList,
+    OperationResultTr,
     OperationResultCode,
     OperationType,
     Void
   }
 
-  alias StellarBase.XDR.Operations.{CreateAccountResult, CreateAccountResultCode}
+  alias StellarBase.XDR.{CreateAccountResult, CreateAccountResultCode}
 
   describe "OperationResultList" do
     setup do
@@ -19,13 +19,13 @@ defmodule StellarBase.XDR.OperationResultListTest do
       op_result1 =
         Void.new()
         |> CreateAccountResult.new(CreateAccountResultCode.new(:CREATE_ACCOUNT_SUCCESS))
-        |> OperationInnerResult.new(OperationType.new(:CREATE_ACCOUNT))
+        |> OperationResultTr.new(OperationType.new(:CREATE_ACCOUNT))
         |> OperationResult.new(code)
 
       op_result2 =
         Void.new()
         |> CreateAccountResult.new(CreateAccountResultCode.new(:CREATE_ACCOUNT_SUCCESS))
-        |> OperationInnerResult.new(OperationType.new(:CREATE_ACCOUNT))
+        |> OperationResultTr.new(OperationType.new(:CREATE_ACCOUNT))
         |> OperationResult.new(code)
 
       op_results = [op_result1, op_result2]
@@ -39,7 +39,7 @@ defmodule StellarBase.XDR.OperationResultListTest do
     end
 
     test "new/1", %{results: results} do
-      %OperationResultList{operations: ^results} = OperationResultList.new(results)
+      %OperationResultList{items: ^results} = OperationResultList.new(results)
     end
 
     test "encode_xdr/1", %{op_result_list: op_result_list, binary: binary} do

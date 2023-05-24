@@ -5,18 +5,25 @@ defmodule StellarBase.XDR.HashIDPreimageTest do
 
   alias StellarBase.XDR.{
     EnvelopeType,
+    Hash,
     HashIDPreimage,
-    OperationID,
+    HashIDPreimageOperationID,
     PoolID,
-    RevokeID,
+    HashIDPreimageRevokeID,
     SequenceNumber,
-    UInt32
+    Int64,
+    Uint32
   }
 
   setup do
     account_id = create_account_id("GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY")
-    seq_number = SequenceNumber.new(123_456)
-    op_num = UInt32.new(123_456)
+
+    seq_number =
+      123_456
+      |> Int64.new()
+      |> SequenceNumber.new()
+
+    op_num = Uint32.new(123_456)
 
     {:ok,
      %{
@@ -26,10 +33,10 @@ defmodule StellarBase.XDR.HashIDPreimageTest do
      }}
   end
 
-  describe "OperationID" do
+  describe "HashIDPreimageOperationID" do
     setup %{account_id: account_id, seq_number: seq_number, op_num: op_num} do
       envelope_type = EnvelopeType.new(:ENVELOPE_TYPE_OP_ID)
-      operation_id = OperationID.new(account_id, seq_number, op_num)
+      operation_id = HashIDPreimageOperationID.new(account_id, seq_number, op_num)
 
       %{
         envelope_type: envelope_type,
@@ -43,7 +50,7 @@ defmodule StellarBase.XDR.HashIDPreimageTest do
     end
 
     test "new/1", %{operation_id: operation_id, envelope_type: envelope_type} do
-      %HashIDPreimage{hash_id: ^operation_id, type: ^envelope_type} =
+      %HashIDPreimage{value: ^operation_id, type: ^envelope_type} =
         HashIDPreimage.new(operation_id, envelope_type)
     end
 
@@ -68,10 +75,14 @@ defmodule StellarBase.XDR.HashIDPreimageTest do
     end
   end
 
-  describe "RevokeID" do
+  describe "HashIDPreimageRevokeID" do
     setup %{account_id: account_id, seq_number: seq_number, op_num: op_num} do
       envelope_type = EnvelopeType.new(:ENVELOPE_TYPE_POOL_REVOKE_OP_ID)
-      liquidity_pool_id = PoolID.new("GCIZ3GSM5XL7OUS4UP64THMDZ7CZ3ZWN")
+
+      liquidity_pool_id =
+        "GCIZ3GSM5XL7OUS4UP64THMDZ7CZ3ZWN"
+        |> Hash.new()
+        |> PoolID.new()
 
       asset =
         create_asset(:alpha_num4,
@@ -79,7 +90,8 @@ defmodule StellarBase.XDR.HashIDPreimageTest do
           issuer: "GBZNLMUQMIN3VGUJISKZU7GNY3O3XLMYEHJCKCSMDHKLGSMKALRXOEZD"
         )
 
-      revoke_id = RevokeID.new(account_id, seq_number, op_num, liquidity_pool_id, asset)
+      revoke_id =
+        HashIDPreimageRevokeID.new(account_id, seq_number, op_num, liquidity_pool_id, asset)
 
       %{
         envelope_type: envelope_type,
@@ -97,7 +109,7 @@ defmodule StellarBase.XDR.HashIDPreimageTest do
     end
 
     test "new/1", %{revoke_id: revoke_id, envelope_type: envelope_type} do
-      %HashIDPreimage{hash_id: ^revoke_id, type: ^envelope_type} =
+      %HashIDPreimage{value: ^revoke_id, type: ^envelope_type} =
         HashIDPreimage.new(revoke_id, envelope_type)
     end
 

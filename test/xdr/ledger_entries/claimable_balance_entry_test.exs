@@ -6,7 +6,7 @@ defmodule StellarBase.XDR.ClaimableBalanceEntryTest do
     ClaimableBalanceID,
     Hash,
     ClaimableBalanceIDType,
-    UInt256,
+    Uint256,
     PublicKey,
     AccountID,
     ClaimantV0,
@@ -14,14 +14,15 @@ defmodule StellarBase.XDR.ClaimableBalanceEntryTest do
     Asset,
     Void,
     AssetType,
-    ClaimableBalanceEntryExtV1,
-    Ext,
-    UInt32,
+    ClaimableBalanceEntryExtensionV1,
+    ClaimableBalanceEntryExtensionV1Ext,
+    Uint32,
     PublicKeyType,
     ClaimPredicateType,
     ClaimPredicate,
     ClaimantType,
     Int64,
+    ClaimantList10,
     ClaimableBalanceEntryExt
   }
 
@@ -29,15 +30,24 @@ defmodule StellarBase.XDR.ClaimableBalanceEntryTest do
 
   @arms [
     %{type: 0, value: Void.new()},
-    %{type: 1, value: ClaimableBalanceEntryExtV1.new(Ext.new(), UInt32.new(1))}
+    %{
+      type: 1,
+      value:
+        ClaimableBalanceEntryExtensionV1.new(
+          ClaimableBalanceEntryExtensionV1Ext.new(Void.new(), 0),
+          Uint32.new(1)
+        )
+    }
   ]
 
   describe "ClaimableBalanceEntry" do
     setup do
+      claimable_balance_id_type = ClaimableBalanceIDType.new(:CLAIMABLE_BALANCE_ID_TYPE_V0)
+
       claimable_balance_id =
         "GCIZ3GSM5XL7OUS4UP64THMDZ7CZ3ZWN"
         |> Hash.new()
-        |> ClaimableBalanceID.new(ClaimableBalanceIDType.new(:CLAIMABLE_BALANCE_ID_TYPE_V0))
+        |> ClaimableBalanceID.new(claimable_balance_id_type)
 
       pk_type = PublicKeyType.new(:PUBLIC_KEY_TYPE_ED25519)
 
@@ -49,12 +59,13 @@ defmodule StellarBase.XDR.ClaimableBalanceEntryTest do
       claimant =
         "GBZNLMUQMIN3VGUJISKZU7GNY3O3XLMYEHJCKCSMDHKLGSMKALRXOEZD"
         |> StrKey.decode!(:ed25519_public_key)
-        |> UInt256.new()
+        |> Uint256.new()
         |> PublicKey.new(pk_type)
         |> AccountID.new()
         |> ClaimantV0.new(claim_predicate1)
         |> Claimant.new(claimant_type)
 
+      claimant_list = ClaimantList10.new([claimant])
       asset = Asset.new(Void.new(), AssetType.new(:ASSET_TYPE_NATIVE))
 
       amount = Int64.new(1)
@@ -67,7 +78,7 @@ defmodule StellarBase.XDR.ClaimableBalanceEntryTest do
 
       %{
         claimable_balance_id: claimable_balance_id,
-        claimant: claimant,
+        claimant_list: claimant_list,
         asset: asset,
         amount: amount,
         claimable_balance_entry_ext_list: claimable_balance_entry_ext_list,
@@ -76,7 +87,7 @@ defmodule StellarBase.XDR.ClaimableBalanceEntryTest do
           |> Enum.map(fn claimable_balance_entry_ext ->
             ClaimableBalanceEntry.new(
               claimable_balance_id,
-              claimant,
+              claimant_list,
               asset,
               amount,
               claimable_balance_entry_ext
@@ -84,22 +95,22 @@ defmodule StellarBase.XDR.ClaimableBalanceEntryTest do
           end),
         binaries: [
           <<0, 0, 0, 0, 71, 67, 73, 90, 51, 71, 83, 77, 53, 88, 76, 55, 79, 85, 83, 52, 85, 80,
-            54, 52, 84, 72, 77, 68, 90, 55, 67, 90, 51, 90, 87, 78, 0, 0, 0, 0, 0, 0, 0, 0, 114,
-            213, 178, 144, 98, 27, 186, 154, 137, 68, 149, 154, 124, 205, 198, 221, 187, 173, 152,
-            33, 210, 37, 10, 76, 25, 212, 179, 73, 138, 2, 227, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 1, 0, 0, 0, 0>>,
+            54, 52, 84, 72, 77, 68, 90, 55, 67, 90, 51, 90, 87, 78, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 114, 213, 178, 144, 98, 27, 186, 154, 137, 68, 149, 154, 124, 205, 198, 221,
+            187, 173, 152, 33, 210, 37, 10, 76, 25, 212, 179, 73, 138, 2, 227, 119, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0>>,
           <<0, 0, 0, 0, 71, 67, 73, 90, 51, 71, 83, 77, 53, 88, 76, 55, 79, 85, 83, 52, 85, 80,
-            54, 52, 84, 72, 77, 68, 90, 55, 67, 90, 51, 90, 87, 78, 0, 0, 0, 0, 0, 0, 0, 0, 114,
-            213, 178, 144, 98, 27, 186, 154, 137, 68, 149, 154, 124, 205, 198, 221, 187, 173, 152,
-            33, 210, 37, 10, 76, 25, 212, 179, 73, 138, 2, 227, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1>>
+            54, 52, 84, 72, 77, 68, 90, 55, 67, 90, 51, 90, 87, 78, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 114, 213, 178, 144, 98, 27, 186, 154, 137, 68, 149, 154, 124, 205, 198, 221,
+            187, 173, 152, 33, 210, 37, 10, 76, 25, 212, 179, 73, 138, 2, 227, 119, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1>>
         ]
       }
     end
 
     test "new/1", %{
       claimable_balance_id: claimable_balance_id,
-      claimant: claimant,
+      claimant_list: claimant_list,
       asset: asset,
       amount: amount,
       claimable_balance_entry_ext_list: claimable_balance_entry_ext_list
@@ -107,15 +118,15 @@ defmodule StellarBase.XDR.ClaimableBalanceEntryTest do
       for claimable_balance_entry_ext <- claimable_balance_entry_ext_list,
           do:
             %ClaimableBalanceEntry{
-              claimable_balance_id: ^claimable_balance_id,
-              claimant: ^claimant,
+              balance_id: ^claimable_balance_id,
+              claimants: ^claimant_list,
               asset: ^asset,
               amount: ^amount,
-              claimable_balance_entry_ext: ^claimable_balance_entry_ext
+              ext: ^claimable_balance_entry_ext
             } =
               ClaimableBalanceEntry.new(
                 claimable_balance_id,
-                claimant,
+                claimant_list,
                 asset,
                 amount,
                 claimable_balance_entry_ext
